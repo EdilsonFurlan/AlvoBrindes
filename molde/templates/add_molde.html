@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Molde 2{% endblock title %}
+
+{% block head %}
+    <!-- Adicione aqui qualquer estilo adicional se necessário -->
+{% endblock head %}
+
+{% block content %}
+   
+    
+        <h2 class="titulo-principal mb-5">Cadastro Molde</h2>
+        <!-- Seção para exibir a mensagem de sucesso -->
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% endif %}
+
+        <form action="{% url 'salvar_molde_url' %}" method="post" enctype="multipart/form-data" > {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="nome">Nome do Molde:</label>
+                        <input type="text" class="form-control mb-3" id="nome" name="nome_molde">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="imagem" class="form-label">Selecione a Imagem</label>
+                        <div class="d-flex">
+                            <input type="file" class="form-control form-control-file" id="imagem" name="imagem_molde" accept="image/*">
+                            <div id="preview" class="ml-2"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+            
+           
+            <div class=" align-items-center "> <!-- Adicionado classes d-flex e align-items-center -->
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <button type="button" id="adicionarCampo" class="btn btn-info">Adicionar Campo</button>
+                <hr><h5 class="text-center">Itens do Molde</h5><hr>
+            </div>
+            
+                
+                
+               
+                <!-- Formulario inline-->
+            <div id="inline"></div>
+            <!-- Espaço em branco com altura igual à altura do rodapé -->
+            <div style="height: 100px;"></div> 
+        </form>
+    {% endblock content %}   
+    {% block js %}
+
+    <script>
+        var index =0 //inicializa a variavel index
+        document.getElementById('adicionarCampo').addEventListener('click', function() {
+            var inline = document.getElementById('inline');
+            
+
+            // Criação da string HTML com os campos input e botão
+        var html = '<div class="row mb-3 d-flex align-items-end">';
+
+            if(index===0){ // primeiro item com os rotulos
+                console.log(index)
+                html += '<div class="col-md-4">';
+                    html += '<div class="form-group">';
+                    html += '<label>Nome:</label>';
+                    html += '<input type="text" class="form-control" name="nome">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<label>Qtd_x:</label>';
+                    html += '<input type="text" class="form-control" name="quantidade_x">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<label>Altura:</label>';
+                    html += '<input type="text" class="form-control" name="altura">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<label>Largura:</label>';
+                    html += '<input type="text" class="form-control" name="largura">';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="col-md-2">';
+                        html += '<div class="form-group">';
+                        html += '<label for="subtipo_matprima">Subtipo Matéria-Prima:</label>';
+                        html += '<select class="form-control" name="subtipo_matprima">';
+                        // Aqui você precisa buscar os dados da tabela SubTipoMatPrima e adicionar as opções à combobox
+                        fetch('/molde/carrega_subtipo/')
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(subtipo => {
+                                    html += '<option value="' + subtipo.id + '">' + subtipo.nome + '</option>';
+                                });
+                                // Fechar a combobox
+                                html += '</select>';
+                                html += '</div>'; // Adicionado fechamento da div form-group
+                                html += '</div>'; // Adicionado fechamento da div col-md-2
+            
+                                // Adiciona o campo "Quantidade" apenas depois de carregar os dados do subtipo de matéria-prima
+                                html += '<div class="col-md-1">';
+                                html += '<div class="form-group">';
+                                html += '<label>Quantidade:</label>';
+                                html += '<input type="text" class="form-control" name="quantidade">';
+                                html += '</div>';
+                                html += '</div>';
+                                // Adiciona o botão "Remover"
+                                html += '<div class="col">';
+                                html += '<button type="button" class="btn btn-danger" onclick="removerCampos(this)">Remover</button>';
+                                html += '</div>';
+                                html += '</div>';
+            
+                                // Verifica se o elemento inline existe e insere o HTML
+                                if (inline) {
+                                    inline.insertAdjacentHTML('beforeend', html);
+                                    console.log('Adicionado')
+                                    index++; // Incrementa o index após cada interacao
+                                } else {
+                                    console.error('Erro: Não foi possível encontrar o elemento modal-body');
+                                }
+                            })
+                            .catch(error => console.error('Erro ao buscar subtipos de matéria-prima:', error));
+            
+            }else{ // Itens sem o rotulo
+
+                html += '<div class="col-md-4">';
+                    html += '<div class="form-group">';
+                    html += '<input type="text" class="form-control" name="nome">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<input type="text" class="form-control" name="quantidade_x">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<input type="text" class="form-control" name="altura">';
+                    html += '</div>';
+                    html += '</div>';
+
+                html += '<div class="col-md-1">';
+                    html += '<div class="form-group">';
+                    html += '<input type="text" class="form-control" name="largura">';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="col-md-2">';
+                        html += '<div class="form-group">';
+                        html += '<select class="form-control" name="subtipo_matprima">';
+                        // Aqui você precisa buscar os dados da tabela SubTipoMatPrima e adicionar as opções à combobox
+                        fetch('/molde/carrega_subtipo/')
+                            .then(response => response.json())
+                            .then(data => {
+                                data.forEach(subtipo => {
+                                    html += '<option value="' + subtipo.id + '">' + subtipo.nome + '</option>';
+                                });
+                                // Fechar a combobox
+                                html += '</select>';
+                                html += '</div>'; // Adicionado fechamento da div form-group
+                                html += '</div>'; // Adicionado fechamento da div col-md-2
+            
+                                // Adiciona o campo "Quantidade" apenas depois de carregar os dados do subtipo de matéria-prima
+                                html += '<div class="col-md-1">';
+                                html += '<div class="form-group">';
+                                html += '<input type="text" class="form-control" name="quantidade">';
+                                html += '</div>';
+                                html += '</div>';
+                                // Adiciona o botão "Remover"
+                                html += '<div class="col">';
+                                html += '<button type="button" class="btn btn-danger" onclick="removerCampos(this)">Remover</button>';
+                                html += '</div>';
+                                html += '</div>';
+            
+                                // Verifica se o elemento inline existe e insere o HTML
+                                if (inline) {
+                                    inline.insertAdjacentHTML('beforeend', html);
+                                    console.log('Adicionado')
+                                    index++; // Incrementa o index após cada interacao
+                                } else {
+                                    console.error('Erro: Não foi possível encontrar o elemento modal-body');
+                                }
+                            })
+                            .catch(error => console.error('Erro ao buscar subtipos de matéria-prima:', error));
+
+               
+
+            }
+                
+            
+
+
+            });
+            
+           // Função para remover os campos
+    function removerCampos(button) {
+        var divRow = button.closest('.row'); // Encontra o elemento pai com a classe 'row'
+        divRow.remove(); // Remove o elemento
+    };
+
+
+//***********Mostra imagem tamanho reduzido ao ser selecionada****************
+document.getElementById('imagem').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.style.maxWidth = '50px'; // Defina o tamanho máximo da imagem
+        img.style.maxHeight = '30px'; // Defina o tamanho máximo da imagem
+        document.getElementById('preview').innerHTML = ''; // Limpe qualquer imagem anterior
+        document.getElementById('preview').appendChild(img); // Adicione a nova imagem ao elemento de visualização
+    }
+    
+    reader.readAsDataURL(file); // Leia o arquivo como um URL de dados
+});
+
+ //*********** Fim Mostra imagem tama reduzido ao ser selecionada****************
+
+
+
+    </script>
+{% endblock js %}

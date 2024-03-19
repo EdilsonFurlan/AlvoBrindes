@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Cliente{% endblock title %}
+
+{% block head %}
+<style>
+    body {
+        background-color: #ebeef2 !important; /* Cor de fundo da tela como cinza claro */
+    }
+    .custom-form {
+        max-width: 600px;
+        margin: 60px auto 0; /* Adiciona margem superior para afastar do menu */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        background-color: #fff; /* Cor de fundo do formulário como branco */
+    }
+
+    .title-box {
+        background-color: #007bff; /* Cor de fundo do retângulo azul */
+        padding: 10px;
+        border-radius: 5px;
+        color: #fff; /* Cor do texto como branco */
+        text-align: center;
+        margin-bottom: 40px; /* Adiciona margem inferior ao retângulo azul */
+    }
+
+</style>
+
+{% endblock head %}
+
+{% block content %}
+ 
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="custom-form " style="background-color: #fff;">
+                
+                <div class="title-box">
+                    <h2 class="mt-0">Criar Cliente</h2> <!-- Removendo a margem superior do título -->
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="id_nome" class="form-label">Nome:</label>
+                            {{ form.nome }}
+                        </div>
+                        <div class="col">
+                            <label for="id_whatsapp" class="form-label">WhatsApp:</label>
+                            {{ form.whatsapp }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_endereco" class="form-label">Endereço:</label>
+                        {{ form.endereco }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+        
+{% endblock content %}
+
+{% block js %}{% endblock js %}
+

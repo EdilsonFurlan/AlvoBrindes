@@ -1,0 +1,52 @@
+
+/* Estilos para paginas Principal*/
+
+/*******Menu*********/
+.nav-item {
+    position: relative;
+}
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    left: 0;
+    top: 100%; /* Adiciona essa propriedade para posicionar o submenu abaixo do item de menu */
+}
+
+.submenu a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.submenu a:hover {
+    background-color: #ddd; /* Altera a cor de fundo ao passar o mouse sobre os itens do submenu */
+}
+
+.nav-item:hover .submenu {
+    display: block;
+}
+/*******Fim Menu*********/
+
+/* Estilos do rodapé */
+.footer {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+/* Titulo Principal*/
+.titulo-principal{
+    text-align: center;
+}
+
+
+

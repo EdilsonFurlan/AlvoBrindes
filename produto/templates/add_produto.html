@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% endblock title %}
+
+
+{% block head %}
+
+          <!-- Inclua os arquivos CSS e JavaScript do Select2 -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+    
+
+
+            <style>
+            
+                .select2-thumbnail {
+                   width: 35px; /* Defina a largura desejada */
+                   height: 35px; /* Defina a altura desejada */
+               }
+            
+               .select2-container--default .select2-selection--single {
+                   height: auto; /* Altura automática */
+                   min-height: 40px; /* Altura mínima */
+                   max-height: 100px; /* Altura máxima */
+               }
+            
+
+    .modal-dialog.modal-larga {
+        max-width: 800px; /* Defina a largura desejada */
+        margin: 1.75rem auto; /* Ajuste o espaçamento conforme necessário */
+    }
+
+</style>
+{% endblock head %}
+
+
+{% block content %}
+
+
+
+
+
+    <h2 class="titulo-principal">Cadastro de Produtos</h2>
+    <!--  Pesquisa Messages -->
+    {% if messages %}
+        {% for i in messages %}
+            <div class="alert {{i.tags}}" role="alert">
+                {{i}}
+            </div>
+        {% endfor %}
+    {% endif %} <!-- Fim Pesquisa Messages -->
+
+
+    <form enctype="multipart/form-data" action="{% url "salvar_produto" %}" method="post"> {% csrf_token %}
+        <div class="row ">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="nome">Nome do Produto:</label>
+                    <input type="text" class="form-control" id="nome" name="nome">
+                </div>
+            </div>
+        
+            <div class="col-mb-5">
+                <div class="form-group">
+                    <label for="id_molde" class="form-label">Selecione o Molde</label>
+                    <select id="id_molde" name="molde" class="form-control">
+                        {% for molde in moldes %}
+                            <option value="{{ molde.id }}">{{ molde.nome_molde }}</option>
+                        {% endfor %}
+                    </select>                            
+                </div>
+            </div>
+        
+         
+        </div> <!-- fim div row -->
+        <div class="row-md-4 ">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="imagem_produto" class="form-label">Selecione a Imagem</label>
+                    <div class="d-flex">
+                        <input type="file" class="form-control form-control-file" id="imagem_produto" name="imagem_produto" accept="image/*">
+                        <div id="preview" class="ml-2"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    
+
+
+        
+        <!-- Botão Adicionar -->
+        <button type="submit" class="btn btn-primary me-2">Salvar Produto</button>
+
+        <!-- Botão Adicionar Item -->
+        
+        <button type="button" class="btn btn-info" id="btn-abrir-itens">Abrir Itens_F2</button>
+        
+        <!--Para adicionar os itens do Produto-->
+        <div id="form-itens-produto" class="form-row"></div>
+       
+<!-- Espaço em branco com altura igual à altura do rodapé -->
+<div style="height: 100px;"></div> 
+    </form>
+    
+  <!-- Modal de Busca -->
+ 
+<div class="modal fade" id="buscarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Buscar Molde Itens</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id='modal-body'>
+                <!-- Conteúdo da busca do molde -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btn-adicionar-modal">Adicionar</button>
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>
+    
+
+
+
+
+
+   <!--Jquery e select2-->
+
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+   <script>
+
+ // Mapear objetos produto para o formato adequado esperado pelo Select2
+    var moldesSelect2 = [];
+    {% for molde in moldes %}
+        moldesSelect2.push({
+            id: '{{ molde.id }}',
+            text: '{{ molde.nome_molde }}',
+            imagem: '{{ molde.imagem_molde }}',
+        });
+        
+    {% endfor %}
+
+    $("#id_molde").select2({
+        
+        data: moldesSelect2,
+        templateResult: function (molde) {
+            console.log('ERERERERER')
+            return $('<span><img src="/media/' + molde.imagem + '" class="img-thumbnail select2-thumbnail" /> ' + molde.text + '</span>');
+        },
+        templateSelection: function (molde) {
+            return $('<span><img src="/media/' + molde.imagem + '" class="img-thumbnail select2-thumbnail" /> ' + molde.text + '</span>');
+        }
+    });
+
+
+
+//************inicio Dom Load**********************
+document.addEventListener('DOMContentLoaded', function() {
+
+//Evento de Teclas para botao*************************************
+
+// Função para lidar com o evento de pressionar tecla
+function handleKeyPress(event) {
+    // Verificar se a tecla pressionada é a tecla F2 (código 113)
+    if (event.keyCode === 113) {
+        // Simular um clique no botão com a classe "btn-abrir-itens"
+        var btnAbrirItens = document.querySelector('#btn-abrir-itens');
+        if (btnAbrirItens) {
+            btnAbrirItens.click(); // Dispara o evento de clique no botão
+        }
+    }
+}
+
+// Adicionar um ouvinte de eventos para o evento "keydown" no documento
+document.addEventListener('keydown', handleKeyPress);
+
+
+//*Fim Evento Tecla para Botoes********************
+
+
+//******Evento Change do Combobox id_molde para limpar forminline de itens Produto
+// Selecionar a combobox de molde
+var moldeSelect = document.getElementById('id_molde');
+
+// Adicionar um evento de mudança à combobox de molde
+moldeSelect.addEventListener('change', function() {
+    // Limpar o formulário inline de itens
+    var formInline = document.getElementById('form-itens-produto');
+    formInline.innerHTML = ''; // Isso remove todos os elementos dentro do formulário inline
+});
+
+
+
+
+//*****************Abrir Modal******************************
+
+document.getElementById('btn-abrir-itens').addEventListener('click', function() {
+    // Seu código para buscar e preencher a modal aqui
+   
+    // Busca o ID do molde selecionado
+    var selectedMoldeId = document.getElementById('id_molde').value;
+    console.log('Buscandoooo')
+    console.log('Id do molde',selectedMoldeId)
+    
+    // Realiza a requisição Ajax para buscar os dados do molde selecionado
+    fetch('/produto/buscar_molde_itens/' + selectedMoldeId)
+       .then(response => response.json())
+       .then(data => {
+           // Verifica se 'molde_itens' está presente em 'data'
+           if (data.hasOwnProperty('molde_itens')) {
+               var modalBody = document.getElementById('modal-body');
+               modalBody.innerHTML = '';
+               var index = 0; // Inicializa a variável index
+
+
+               // Itera sobre os itens do molde e adiciona-os à modal
+               data.molde_itens.forEach(item => {
+
+                   var html = '<div class="row">';
+
+                if (index === 0) {
+                    
+                    html += '<div class="col-md-1">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<label>Id_Molde:</label><br>';
+                        html += '<input type="text" class="form-control teste subtipo" id="id" name="id"  value="' + item.id + '" readonly >';
+                        html += '</div>';
+                        html += '</div>';
+
+
+                   html += '<div class="col-md-1">';
+                   html += '<div class="form-group mb-3">';
+                   html += '<label>ID_Sub:</label><br>';
+                   html += '<input type="text" class="form-control teste subtipo" id="subtipo" name="subtipo" id="id_subtipo" value="' + item.id_subtipo + '" readonly>';
+                   html += '</div>';
+                   html += '</div>';
+
+                   html += '<div class="col-md-2">';
+                   html += '<div class="form-group mb-3">';
+                   html += '<label>Nome Subtipo:</label><br>';
+                   html += '<input type="text" class="form-control teste nome_subtipo" id="nome_subtipo" name="nome_subtipo" value="' + item.subtipo_nome + '" readonly>';
+                   html += '</div>';
+                   html += '</div>';
+
+                   html += '<div class="col-md-4">';
+                   html += '<div class="form-group mb-3">';
+                   html += '<label>Nome:</label>';
+                   html += '<input type="text" class="form-control teste" id="nome" name="nome" value="' + item.nome + '" readonly>';
+                   html += '</div>';
+                   html += '</div>';
+
+                   html += '<div class="col-md-2">';
+                   html += '<div class="form-group mb-3">';
+                   html += '<label>Quantidade:</label>';
+                   html += '<input type="text" class="form-control teste quantidade" id="quantidade" name="quantidade" value="' + item.quantidade + '" readonly>';
+                   html += '</div>';
+                   html += '</div>';
+
+                   html += '<div class="col-md-2">';
+                   html += '<div class="form-group mb-3">';
+                   html += '<label>Tipo_MatPrima:</label>';
+                   html += '<select class="form-control teste" id="matprima_tipo_' + item.id + '"></select>';
+                   html += '</div>';
+                   html += '</div>';
+                   html += '</div>';
+                   }else {
+
+                    html += '<div class="col-md-1">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<input type="text" class="form-control teste subtipo" id="id" name="id"  value="' + item.id + '" readonly>';
+                        html += '</div>';
+                        html += '</div>';
+
+                    html += '<div class="col-md-1">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<input type="text" class="form-control teste subtipo" id="subtipo" name="subtipo" id="id_subtipo" value="' + item.id_subtipo + '" readonly>';
+                        html += '</div>';
+                        html += '</div>';
+
+                        html += '<div class="col-md-2">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<input type="text" class="form-control teste nome_subtipo" id="nome_subtipo" name="nome_subtipo" value="' + item.subtipo_nome + '" readonly>';
+                        html += '</div>';
+                        html += '</div>';
+
+                        html += '<div class="col-md-4">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<input type="text" class="form-control teste" id="nome" name="nome" value="' + item.nome + '" readonly>';
+                        html += '</div>';
+                        html += '</div>';
+
+                        html += '<div class="col-md-2">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<input type="text" class="form-control teste quantidade" id="quantidade" name="quantidade" value="' + item.quantidade + '" readonly>';
+                        html += '</div>';
+                        html += '</div>';
+
+                        html += '<div class="col-md-2">';
+                        html += '<div class="form-group mb-3">';
+                        html += '<select class="form-control teste" id="matprima_tipo_' + item.id + '"></select>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+
+                }
+               
+                   modalBody.innerHTML += html;
+                   index++; // Incrementa o index após cada iteração
+                   
+                   // Fetch para buscar os dados de MatPrimaTipo filtrados pelo id_subtipo atual
+                   fetch('/produto/buscar_matprima_tipo/' + item.id_subtipo)
+                   .then(response => response.json())
+                   .then(matprima_tipo_data => {
+                       console.log('Dados recebidos:', matprima_tipo_data); // Verifica os dados recebidos
+                                               
+                       var selectElement = document.getElementById('matprima_tipo_' + item.id);
+                       selectElement.innerHTML = '';
+                                               
+                       // Verifica se os dados foram recebidos corretamente
+                       if (Array.isArray(matprima_tipo_data.tipos_matprima)) {
+                           // Itera sobre os tipos de matéria-prima e adiciona-os ao <select>
+                           matprima_tipo_data.tipos_matprima.forEach(matprima_tipo => {
+                               var option = document.createElement('option');
+                               option.value = matprima_tipo.id;
+                               option.textContent = matprima_tipo.nome;
+                               selectElement.appendChild(option);
+                           });
+                       } else {
+                           console.error('Erro: Os dados de MatPrimaTipo não foram recebidos corretamente');
+                       }
+                   })
+                   
+                   .catch(error => console.error('Erro ao buscar dados de MatPrimaTipo: ', error));
+                   
+               });
+           } else {
+               console.error('Erro: Não foi possível encontrar molde_itens em data');
+           }
+       })
+       .catch(error => console.error('Erro ao buscar molde itens:', error));
+    
+       $('#buscarModal').modal('show'); // Isso abrirá a modal com o ID "buscarModal"
+    });
+
+
+// ************* Fim Abrir Modal***************************
+
+
+// Clique no botão adicionar da modal para adicionar itens ao formulário inline
+document.getElementById('btn-adicionar-modal').addEventListener('click', function() {
+    // Objeto para armazenar as informações por ID de tipo
+    var infoPorIdTipo = {};
+
+    // Selecionar todas as linhas do formulário dentro da modal
+    document.querySelectorAll('.modal-body .row').forEach(function(formRow) {
+        // Obter o ID, nome e quantidade selecionados na combobox
+        var selectElement = formRow.querySelector('.form-group select');
+        var idTipo = selectElement.value;
+        var nomeTipo = selectElement.options[selectElement.selectedIndex].text;
+        var quantidade = parseFloat(formRow.querySelector('.form-group input[name="quantidade"]').value);
+        console.log(quantidade)
+        var idMoldeItem = formRow.querySelector('.form-group input[name="id"]').value; // Corrigido para buscar o campo correto
+        console.log(idMoldeItem)
+        var nomeMoldeItem = formRow.querySelector('.form-group input[name="nome"]').value; // Corrigido para buscar o campo correto
+        
+        // Verificar se o ID de tipo já existe no objeto infoPorIdTipo
+        if (!infoPorIdTipo[idTipo]) {
+            // Se não existir, inicialize um array com as informações atuais
+            infoPorIdTipo[idTipo] = [];
+        }
+        
+        // Adicionar a quantidade atual ao array de quantidades
+        infoPorIdTipo[idTipo].push({
+            molde_item_id: idMoldeItem, // Adicionar o ID do MoldeItem
+            nomeMoldeItem: nomeMoldeItem, // Adicionar o nome do MoldeItem
+            nome: nomeTipo,
+            quantidade: quantidade
+        });
+    });
+
+    // Selecionar o formulário inline
+    var formInline = document.getElementById('form-itens-produto');
+    formInline.innerHTML = ''; // Limpar o conteúdo do formulário  
+    var index = 0; // Inicializa a variável index
+
+    // Iterar sobre os tipos e suas quantidades
+    for (var idTipo in infoPorIdTipo) {
+        // Iterar sobre as quantidades do tipo atual
+        infoPorIdTipo[idTipo].forEach(function(info) {
+            // Construir o HTML dos novos campos com os resultados obtidos
+            var html = '<div class="row">';
+        if (index === 0){
+                //Id_Item
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<label>Id_Item:</label><br>';
+            html += '<input type="text" class="form-control" name="idMoldeItem[]" value="' + info.molde_item_id + '" readonly style="margin-top: 5px;">'; // Incluir o campo ID do MoldeItem
+            html += '</div>';
+            html += '</div>';
+                //Descricao
+            html += '<div class="col-md-3">';
+            html += '<div class="form-group mb-3">';
+            html += '<label>Descricao:</label><br>';
+            html += '<input type="text" class="form-control" name="nomeMoldeItem[]" value="' + info.nomeMoldeItem + '" readonly style="margin-top: 5px;">'; // Incluir o campo Nome do MoldeItem
+            html += '</div>';
+            html += '</div>';
+                //Id_Tipo
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<label>ID_Tipo:</label><br>';
+            html += '<input type="text" class="form-control" name="idTipoMatPrima[]" value="' + idTipo + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+                //Tipo MatPrima
+            html += '<div class="col-md-3">';
+            html += '<div class="form-group mb-3">';
+            html += '<label>Tipo MatPrima:</label><br>';
+            html += '<input type="text" class="form-control" name="nomeMatPrima[]" value="' + info.nome + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+                //Quantidade
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<label>Quantidade:</label><br>';
+            html += '<input type="text" class="form-control" name="quantidade[]" value="' + info.quantidade + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+        } else { // fim if
+                    // Id_Molde
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<input type="text" class="form-control" name="idMoldeItem[]" value="' + info.molde_item_id + '" readonly style="margin-top: 5px;">'; // Incluir o campo ID do MoldeItem
+            html += '</div>';
+            html += '</div>';
+                //Descricao
+            html += '<div class="col-md-3">';
+            html += '<div class="form-group mb-3">';
+            html += '<input type="text" class="form-control" name="nomeMoldeItem[]" value="' + info.nomeMoldeItem + '" readonly style="margin-top: 5px;">'; // Incluir o campo Nome do MoldeItem
+            html += '</div>';
+            html += '</div>';
+                //Id_Tipo
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<input type="text" class="form-control" name="idTipoMatPrima[]" value="' + idTipo + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+                //Tipo_MatPrima
+            html += '<div class="col-md-3">';
+            html += '<div class="form-group mb-3">';
+            html += '<input type="text" class="form-control" name="nomeMatPrima[]" value="' + info.nome + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+                //Quantidade
+            html += '<div class="col-md-1">';
+            html += '<div class="form-group mb-3">';
+            html += '<input type="text" class="form-control" name="quantidade[]" value="' + info.quantidade + '" readonly style="margin-top: 5px;">';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+        } // fim else
+            // Adicionar o HTML ao formulário inline
+            formInline.innerHTML += html;
+            index++; // Incrementa o index após cada iteração
+        });
+    }
+
+    // Fechar a modal
+    $('#buscarModal').modal('hide');
+});
+
+//***********Mostra imagem tamanho reduzido ao ser selecionada****************
+document.getElementById('imagem_produto').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.style.maxWidth = '50px'; // Defina o tamanho máximo da imagem
+        img.style.maxHeight = '30px'; // Defina o tamanho máximo da imagem
+        document.getElementById('preview').innerHTML = ''; // Limpe qualquer imagem anterior
+        document.getElementById('preview').appendChild(img); // Adicione a nova imagem ao elemento de visualização
+    }
+    
+    reader.readAsDataURL(file); // Leia o arquivo como um URL de dados
+});
+
+ //*********** Fim Mostra imagem tama reduzido ao ser selecionada****************
+
+}); //fim load eventlistener
+
+
+
+</script>
+{% endblock content %}
